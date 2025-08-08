@@ -2,12 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { theme } from '../../../theme';
-import { financeService } from '../../lib/finance-service';
+import { financeService, CategoryBreakdown } from '../../lib/finance-service';
+
+interface ExpenseCategory {
+  name: string;
+  amount: number;
+  percentage: number;
+  color: string;
+}
 
 export default function ExpenseChart() {
-  const [expenseCategories, setExpenseCategories] = useState([]);
+  const [expenseCategories, setExpenseCategories] = useState<ExpenseCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [totalExpenses, setTotalExpenses] = useState(0);
 
   useEffect(() => {
@@ -16,13 +23,13 @@ export default function ExpenseChart() {
         setLoading(true);
         setError(null);
 
-        const breakdown = await financeService.getExpenseCategoryBreakdown();
+        const breakdown: CategoryBreakdown[] = await financeService.getExpenseCategoryBreakdown();
         const total = breakdown.reduce((sum, cat) => sum + cat.total, 0);
         
         // Map backend data to frontend format with colors
         const colors = [theme.colors.chart1, theme.colors.chart2, theme.colors.chart3, theme.colors.chart4, theme.colors.chart5];
         
-        const categoriesWithPercentage = breakdown.map((category, index) => ({
+        const categoriesWithPercentage: ExpenseCategory[] = breakdown.map((category, index) => ({
           name: category.category,
           amount: category.total,
           percentage: total > 0 ? Math.round((category.total / total) * 100) : 0,
@@ -31,9 +38,10 @@ export default function ExpenseChart() {
 
         setExpenseCategories(categoriesWithPercentage);
         setTotalExpenses(total);
-      } catch (err) {
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load expense data';
         console.error('Failed to load expense breakdown:', err);
-        setError('Failed to load expense data');
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       // Step 1: Login and get token
-      const loginResponse = await authService.login({ email, password });
+      await authService.login({ email, password });
       
       // Step 2: Fetch user data using the token
       const userProfile = await authService.getProfile();

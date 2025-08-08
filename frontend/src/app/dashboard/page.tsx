@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 import { theme } from '../../../theme';
 import { financeService } from '../../lib/finance-service';
 
-// Dashboard components
 import DashboardHeader from '../../components/dashboard/dashboard-header';
 import FinancialOverview from '../../components/dashboard/financial-overview';
 import RecentTransactions from '../../components/dashboard/recent-transactions';
@@ -14,6 +13,15 @@ import BudgetProgress from '../../components/dashboard/budget-progress';
 import QuickActions from '../../components/dashboard/quick-actions';
 import ExpenseChart from '../../components/dashboard/expense-chart';
 import IncomeVsExpenses from '../../components/dashboard/income-vs-expenses';
+
+interface Transaction {
+  id: string;
+  description: string;
+  amount: number;
+  date: string;
+  category: string;
+  type: 'income' | 'expense';
+}
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -23,7 +31,7 @@ export default function DashboardPage() {
     monthlyExpenses: 0,
     savings: 0,
     budgetUsed: 0,
-    recentTransactions: [],
+    recentTransactions: [] as Transaction[],
     loading: true,
     error: null as string | null
   });
@@ -44,7 +52,7 @@ export default function DashboardPage() {
           monthlyExpenses: summary.totalExpenses,
           savings: summary.savings,
           budgetUsed: summary.totalIncome > 0 ? Math.round((summary.totalExpenses / summary.totalIncome) * 100) : 0,
-          recentTransactions: summary.transactions.slice(0, 5),
+          recentTransactions: summary.transactions.slice(0, 5) as Transaction[],
           loading: false,
           error: null
         });
@@ -116,7 +124,7 @@ export default function DashboardPage() {
                 fontSize: theme.typography.fontSize.lg 
               }}
             >
-              Here's your financial overview for {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
+              Here&apos;s your financial overview for {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
             </p>
           </div>
 

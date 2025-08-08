@@ -3,11 +3,12 @@
 import { theme } from '../../../theme';
 
 interface Transaction {
-  id: number;
+  id: string;
   description: string;
   amount: number;
   date: string;
   category: string;
+  type?: 'income' | 'expense';
 }
 
 interface RecentTransactionsProps {

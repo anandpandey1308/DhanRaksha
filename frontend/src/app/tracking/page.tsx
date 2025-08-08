@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
 import { taskApi, Task, TaskStats } from "./api";
 
 // Phase configuration for UI display
-const phaseConfig = {
+const phaseConfig: Record<string, { icon: string; color: string }> = {
   "phase-0": { icon: "🔧", color: "from-indigo-500 to-indigo-700" },
   "phase-1": { icon: "🔐", color: "from-blue-500 to-blue-700" },
   "phase-2": { icon: "💰", color: "from-green-500 to-green-700" },
@@ -52,9 +51,10 @@ const TrackingPage = () => {
       ]);
       setTasks(tasksData);
       setStats(statsData);
-    } catch (err) {
-      console.error("Error loading tasks:", err);
-      setError("Failed to load tasks. Please try again.");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load tasks";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -75,9 +75,10 @@ const TrackingPage = () => {
       // Refresh stats
       const newStats = await taskApi.getTaskStats();
       setStats(newStats);
-    } catch (err) {
-      console.error("Error updating task:", err);
-      setError("Failed to update task. Please try again.");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to update task";
+      setError(errorMessage);
     }
   };
 
@@ -85,9 +86,10 @@ const TrackingPage = () => {
     try {
       await taskApi.initializeTasks();
       await loadTasks();
-    } catch (err) {
-      console.error("Error initializing tasks:", err);
-      setError("Failed to initialize tasks. Please try again.");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to initialize tasks";
+      setError(errorMessage);
     }
   };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, CSSProperties } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../../../contexts/auth-context';
@@ -30,11 +30,27 @@ export default function LoginPage() {
       setError('');
       await login(data.email, data.password);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && err.message
+        ? err.message
+        : 'Login failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const inputStyle: CSSProperties = {
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+    color: theme.colors.textPrimary,
+    borderRadius: theme.radii.md,
+    fontSize: theme.typography.fontSize.base,
+  };
+
+  const errorInputStyle: CSSProperties = {
+    ...inputStyle,
+    borderColor: theme.colors.loss,
   };
 
   return (
@@ -122,14 +138,7 @@ export default function LoginPage() {
                     {...register('email')}
                     type="email"
                     className="w-full px-4 py-3 rounded-md border focus:outline-none focus:ring-2 transition-colors"
-                    style={{ 
-                      borderColor: errors.email ? theme.colors.loss : theme.colors.border,
-                      backgroundColor: theme.colors.surface,
-                      color: theme.colors.textPrimary,
-                      borderRadius: theme.radii.md,
-                      fontSize: theme.typography.fontSize.base,
-                      '--tw-ring-color': theme.colors.primary,
-                    } as any}
+                    style={errors.email ? errorInputStyle : inputStyle}
                     placeholder="Enter your email"
                   />
                   {errors.email && (
@@ -160,14 +169,7 @@ export default function LoginPage() {
                     {...register('password')}
                     type="password"
                     className="w-full px-4 py-3 rounded-md border focus:outline-none focus:ring-2 transition-colors"
-                    style={{ 
-                      borderColor: errors.password ? theme.colors.loss : theme.colors.border,
-                      backgroundColor: theme.colors.surface,
-                      color: theme.colors.textPrimary,
-                      borderRadius: theme.radii.md,
-                      fontSize: theme.typography.fontSize.base,
-                      '--tw-ring-color': theme.colors.primary,
-                    } as any}
+                    style={errors.password ? errorInputStyle : inputStyle}
                     placeholder="Enter your password"
                   />
                   {errors.password && (
@@ -194,7 +196,6 @@ export default function LoginPage() {
                   borderRadius: theme.radii.md,
                   fontWeight: theme.typography.fontWeight.medium,
                   fontSize: theme.typography.fontSize.base,
-                  '--tw-ring-color': theme.colors.primary,
                 }}
                 onMouseEnter={(e) => {
                   if (!loading) {
@@ -218,7 +219,7 @@ export default function LoginPage() {
                     fontSize: theme.typography.fontSize.sm 
                   }}
                 >
-                  Don't have an account?{' '}
+                  Don&apos;t have an account?{' '}
                   <Link 
                     href="/auth/signup" 
                     className="font-medium hover:underline transition-colors"

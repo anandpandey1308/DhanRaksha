@@ -4,10 +4,16 @@ import { useState, useEffect } from 'react';
 import { theme } from '../../../theme';
 import { financeService } from '../../lib/finance-service';
 
+interface MonthlyData {
+  month: string;
+  income: number;
+  expenses: number;
+}
+
 export default function IncomeVsExpenses() {
-  const [monthlyData, setMonthlyData] = useState([]);
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadMonthlyData = async () => {
@@ -16,7 +22,7 @@ export default function IncomeVsExpenses() {
         setError(null);
 
         // Get data for last 6 months
-        const months = [];
+        const months: MonthlyData[] = [];
         const currentDate = new Date();
         
         for (let i = 5; i >= 0; i--) {
@@ -40,9 +46,10 @@ export default function IncomeVsExpenses() {
         }
 
         setMonthlyData(months);
-      } catch (err) {
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load chart data';
         console.error('Failed to load monthly data:', err);
-        setError('Failed to load chart data');
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState } from 'react';
+import { useState, CSSProperties } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupSchema, SignupFormData } from '../../../lib/schemas';
@@ -41,11 +40,27 @@ export default function SignupPage() {
       
       // Step 2: Fetch user profile and redirect will be handled by auth context
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Signup failed. Please try again.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && err.message
+        ? err.message
+        : 'Signup failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const inputStyle: CSSProperties = {
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+    color: theme.colors.textPrimary,
+    borderRadius: theme.radii.md,
+    fontSize: theme.typography.fontSize.base,
+  };
+
+  const errorInputStyle: CSSProperties = {
+    ...inputStyle,
+    borderColor: theme.colors.loss,
   };
 
   return (
@@ -134,14 +149,7 @@ export default function SignupPage() {
                       {...register('firstName')}
                       type="text"
                       className="w-full px-4 py-3 rounded-md border focus:outline-none focus:ring-2 transition-colors"
-                      style={{ 
-                        borderColor: errors.firstName ? theme.colors.loss : theme.colors.border,
-                        backgroundColor: theme.colors.surface,
-                        color: theme.colors.textPrimary,
-                        borderRadius: theme.radii.md,
-                        fontSize: theme.typography.fontSize.base,
-                        '--tw-ring-color': theme.colors.primary,
-                      } as any}
+                      style={errors.firstName ? errorInputStyle : inputStyle}
                       placeholder="First name"
                     />
                     {errors.firstName && (
@@ -149,7 +157,7 @@ export default function SignupPage() {
                         className="mt-1 text-sm"
                         style={{ 
                           color: theme.colors.loss,
-                          fontSize: theme.typography.fontSize.xs 
+                          fontSize: theme.typography.fontSize.sm 
                         }}
                       >
                         {errors.firstName.message}
@@ -172,14 +180,7 @@ export default function SignupPage() {
                       {...register('lastName')}
                       type="text"
                       className="w-full px-4 py-3 rounded-md border focus:outline-none focus:ring-2 transition-colors"
-                      style={{ 
-                        borderColor: errors.lastName ? theme.colors.loss : theme.colors.border,
-                        backgroundColor: theme.colors.surface,
-                        color: theme.colors.textPrimary,
-                        borderRadius: theme.radii.md,
-                        fontSize: theme.typography.fontSize.base,
-                        '--tw-ring-color': theme.colors.primary,
-                      } as any}
+                      style={errors.lastName ? errorInputStyle : inputStyle}
                       placeholder="Last name"
                     />
                     {errors.lastName && (
@@ -187,7 +188,7 @@ export default function SignupPage() {
                         className="mt-1 text-sm"
                         style={{ 
                           color: theme.colors.loss,
-                          fontSize: theme.typography.fontSize.xs 
+                          fontSize: theme.typography.fontSize.sm 
                         }}
                       >
                         {errors.lastName.message}
@@ -211,14 +212,7 @@ export default function SignupPage() {
                     {...register('email')}
                     type="email"
                     className="w-full px-4 py-3 rounded-md border focus:outline-none focus:ring-2 transition-colors"
-                    style={{ 
-                      borderColor: errors.email ? theme.colors.loss : theme.colors.border,
-                      backgroundColor: theme.colors.surface,
-                      color: theme.colors.textPrimary,
-                      borderRadius: theme.radii.md,
-                      fontSize: theme.typography.fontSize.base,
-                      '--tw-ring-color': theme.colors.primary,
-                    } as any}
+                    style={errors.email ? errorInputStyle : inputStyle}
                     placeholder="Enter your email"
                   />
                   {errors.email && (
@@ -249,14 +243,7 @@ export default function SignupPage() {
                     {...register('password')}
                     type="password"
                     className="w-full px-4 py-3 rounded-md border focus:outline-none focus:ring-2 transition-colors"
-                    style={{ 
-                      borderColor: errors.password ? theme.colors.loss : theme.colors.border,
-                      backgroundColor: theme.colors.surface,
-                      color: theme.colors.textPrimary,
-                      borderRadius: theme.radii.md,
-                      fontSize: theme.typography.fontSize.base,
-                      '--tw-ring-color': theme.colors.primary,
-                    } as any}
+                    style={errors.password ? errorInputStyle : inputStyle}
                     placeholder="Create a password"
                   />
                   {errors.password && (
@@ -287,14 +274,7 @@ export default function SignupPage() {
                     {...register('confirmPassword')}
                     type="password"
                     className="w-full px-4 py-3 rounded-md border focus:outline-none focus:ring-2 transition-colors"
-                    style={{ 
-                      borderColor: errors.confirmPassword ? theme.colors.loss : theme.colors.border,
-                      backgroundColor: theme.colors.surface,
-                      color: theme.colors.textPrimary,
-                      borderRadius: theme.radii.md,
-                      fontSize: theme.typography.fontSize.base,
-                      '--tw-ring-color': theme.colors.primary,
-                    } as any}
+                    style={errors.confirmPassword ? errorInputStyle : inputStyle}
                     placeholder="Confirm your password"
                   />
                   {errors.confirmPassword && (
@@ -321,7 +301,6 @@ export default function SignupPage() {
                   borderRadius: theme.radii.md,
                   fontWeight: theme.typography.fontWeight.medium,
                   fontSize: theme.typography.fontSize.base,
-                  '--tw-ring-color': theme.colors.primary,
                 }}
                 onMouseEnter={(e) => {
                   if (!loading) {

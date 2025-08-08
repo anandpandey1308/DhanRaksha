@@ -2,9 +2,10 @@
 
 import { useAuth } from '../../contexts/auth-context';
 import { theme } from '../../../theme';
+import { User } from '../../lib/auth-service';
 
 interface DashboardHeaderProps {
-  user: any;
+  user: User | null;
 }
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
