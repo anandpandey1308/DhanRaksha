@@ -26,9 +26,6 @@ async function createNestServer(expressInstance: express.Express) {
   // Global validation pipe
   app.useGlobalPipes(new ValidationPipe());
 
-  // Set global prefix
-  app.setGlobalPrefix('api');
-
   await app.init();
   return app.getHttpAdapter().getInstance();
 }
