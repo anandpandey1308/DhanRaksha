@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { mongoConfig } from './config/mongo.config';
 import { AuthModule } from './auth/auth.module';
 import { UserController } from './users/user.controller';
@@ -15,6 +16,7 @@ import { Expense, ExpenseSchema } from './budgets/expense.schema';
 import { Task, TaskSchema } from './budgets/task.schema';
 import { TaskController } from './budgets/task.controller';
 import { TaskService } from './budgets/task.service';
+import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
 
 @Module({
   imports: [
@@ -32,6 +34,15 @@ import { TaskService } from './budgets/task.service';
     ExpenseController,
     TaskController,
   ],
-  providers: [UserService, IncomeService, ExpenseService, TaskService],
+  providers: [
+    UserService,
+    IncomeService,
+    ExpenseService,
+    TaskService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: PerformanceInterceptor,
+    },
+  ],
 })
 export class AppModule {}
