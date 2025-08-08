@@ -5,10 +5,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import mongoose from 'mongoose';
-import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Create app with reduced logging
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn'], // Only show errors and warnings, remove 'log'
+  });
 
   // Enable CORS for frontend
   app.enableCors({
@@ -18,11 +20,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.use((req, res, next) => {
-    Logger.log(`Incoming Request: ${req.method} ${req.url}`);
-    next();
-  });
-
   mongoose.connection.once('open', () => {
     console.log(`✅ Connected to MongoDB: ${mongoose.connection.name}`);
   });
@@ -30,9 +27,6 @@ async function bootstrap() {
   mongoose.connection.on('error', (err: Error) => {
     console.error('❌ MongoDB connection error:', err.message);
   });
-
-  // Removed RouterExplorer-related code as it is not available in @nestjs/common
-  console.log('Registered Routes feature is not implemented.');
 
   await app.listen(5000);
   console.log(`🚀 Backend running on http://localhost:5000`);

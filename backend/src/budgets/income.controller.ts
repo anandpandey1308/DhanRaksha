@@ -13,24 +13,15 @@ import { IncomeDto } from '../common/dto/income.dto';
 
 @Controller('income')
 export class IncomeController {
-  constructor(private readonly incomeService: IncomeService) {
-    console.log('IncomeController instantiated');
-  }
+  constructor(private readonly incomeService: IncomeService) {}
 
   @Get('test')
-  testRoute() {
-    console.log('Test route in IncomeController executed');
-    return { message: 'Test route executed' };
+  test() {
+    return { message: 'Income controller is working!' };
   }
 
   @Get('filter-by-month')
   filterByMonth(@Query('month') month: number, @Query('year') year: number) {
-    console.log(
-      'filterByMonth route matched with month:',
-      month,
-      'and year:',
-      year,
-    );
     return this.incomeService.filterByMonth(month, year);
   }
 

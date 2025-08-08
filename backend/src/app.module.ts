@@ -34,8 +34,4 @@ import { TaskService } from './budgets/task.service';
   ],
   providers: [UserService, IncomeService, ExpenseService, TaskService],
 })
-export class AppModule {
-  constructor() {
-    console.log('AppModule loaded with IncomeController');
-  }
-}
+export class AppModule {}
