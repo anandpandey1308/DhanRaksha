@@ -1,12 +1,7 @@
 {
   "version": 2,
-  "name": "dhanraksha-backend",
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node"
-    }
-  ],
+  "outputDirectory": "dist",
+  "buildCommand": "npm run build",
   "routes": [
     {
       "src": "/api/(.*)",
