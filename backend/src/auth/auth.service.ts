@@ -33,7 +33,19 @@ export class AuthService {
     });
     await newUser.save();
 
-    return { message: 'Signup successful' };
+    // Generate token and return user data for immediate login
+    const payload = { sub: newUser.id, email: newUser.email };
+    const token = this.jwtService.sign(payload);
+
+    return {
+      access_token: token,
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role,
+      },
+    };
   }
 
   async login(dto: LoginDto) {
@@ -43,10 +55,19 @@ export class AuthService {
     const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    const payload = { sub: user._id, email: user.email };
+    const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
 
-    return { access_token: token };
+    // Return both user data and access token
+    return {
+      access_token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    };
   }
 
   async requestPasswordReset(email: string): Promise<{ message: string }> {
@@ -54,7 +75,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const token = this.jwtService.sign({ sub: user._id }, { expiresIn: '1h' });
+    const token = this.jwtService.sign({ sub: user.id }, { expiresIn: '1h' }); // Use user.id
     // Send token via email (integration pending)
     return { message: 'Password reset email sent' };
   }
@@ -69,7 +90,8 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await this.userService.updateUser(user._id, {
+    await this.userService.updateUser(user.id, {
+      // Use user.id
       passwordHash: hashedPassword,
     });
     return { message: 'Password reset successful' };
@@ -84,11 +106,12 @@ export class AuthService {
       throw new BadRequestException('Email is already verified');
     }
     const token = this.jwtService.sign(
-      { sub: user._id, email: user.email },
+      { sub: user.id, email: user.email }, // Use user.id
       { expiresIn: '1d' },
     );
     console.log('Generated valid JWT token:', token);
-    await this.userService.updateUser(user._id, {
+    await this.userService.updateUser(user.id, {
+      // Use user.id
       emailVerificationToken: token,
     });
     console.log('Token saved in database.');
@@ -111,7 +134,8 @@ export class AuthService {
       });
       throw new BadRequestException('Invalid or expired token');
     }
-    await this.userService.updateUser(user._id, {
+    await this.userService.updateUser(user.id, {
+      // Use user.id
       isEmailVerified: true,
       emailVerificationToken: undefined,
     });

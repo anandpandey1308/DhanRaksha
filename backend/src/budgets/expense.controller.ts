@@ -17,6 +17,16 @@ export class ExpenseController {
     return this.expenseService.findAll();
   }
 
+  @Get('filter-by-month')
+  filterByMonth(@Query('month') month: number, @Query('year') year: number) {
+    return this.expenseService.filterByMonth(month, year);
+  }
+
+  @Get('category-breakdown')
+  categoryBreakdown() {
+    return this.expenseService.categoryBreakdown();
+  }
+
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.expenseService.findById(id);
@@ -30,15 +40,5 @@ export class ExpenseController {
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.expenseService.delete(id);
-  }
-
-  @Get('filter-by-month')
-  filterByMonth(@Query('month') month: number, @Query('year') year: number) {
-    return this.expenseService.filterByMonth(month, year);
-  }
-
-  @Get('category-breakdown')
-  categoryBreakdown() {
-    return this.expenseService.categoryBreakdown();
   }
 }

@@ -9,7 +9,7 @@ export class UserService {
 
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async getUserById(userId: string): Promise<User> {
+  async getUserById(userId: string): Promise<UserDocument> {
     const user = await this.userModel.findById(userId).select('-passwordHash');
     if (!user) {
       throw new NotFoundException('User not found');
@@ -17,7 +17,7 @@ export class UserService {
     return user;
   }
 
-  async updateUser(userId: string, updateData: Partial<User>): Promise<User> {
+  async updateUser(userId: string, updateData: Partial<User>): Promise<UserDocument> {
     this.logger.log(
       `Updating user with ID: ${userId} with data: ${JSON.stringify(updateData)}`,
     );
@@ -37,14 +37,14 @@ export class UserService {
     return user;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email }).exec();
   }
 
   async updateUserByEmail(
     email: string,
     updateData: Partial<User>,
-  ): Promise<User> {
+  ): Promise<UserDocument> {
     console.log('Updating user with email:', email, 'with data:', updateData);
     const user = await this.userModel
       .findOneAndUpdate({ email }, updateData, {
