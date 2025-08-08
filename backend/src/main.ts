@@ -18,9 +18,22 @@ async function bootstrap() {
       'https://dhanraksha.vercel.app',
       /^https:\/\/dhanraksha.*\.vercel\.app$/,
     ],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'User-Agent',
+      'Referer',
+      'sec-ch-ua',
+      'sec-ch-ua-mobile',
+      'sec-ch-ua-platform',
+      'X-Requested-With',
+      'Origin',
+    ],
     credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   mongoose.connection.once('open', () => {
