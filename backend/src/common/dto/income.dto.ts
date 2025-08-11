@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, IsDate } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class IncomeDto {
   @IsNotEmpty()
@@ -9,9 +9,10 @@ export class IncomeDto {
   @IsNumber()
   amount: number;
 
+  // Accept as ISO string; Mongoose will cast to Date
   @IsNotEmpty()
-  @IsDate()
-  date: Date;
+  @IsString()
+  date: string;
 
   @IsString()
   category?: string;

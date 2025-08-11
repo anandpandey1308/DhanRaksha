@@ -1,168 +1,85 @@
 'use client';
 
-import { useAuth } from '../../contexts/auth-context';
-import { ProtectedRoute } from '../../components/protected-route';
-import { useState, useEffect } from 'react';
-import { theme } from '../../../theme';
-import { financeService } from '../../lib/finance-service';
+import React, { useEffect, useMemo } from 'react';
+import { usePlannerStore } from '../../lib/store';
+import { formatINR } from '../../lib/format';
+import { motion } from 'framer-motion';
+import NetWorthLine from '@/components/planner/charts/net-worth-line';
+import EmergencyFundLine from '@/components/planner/charts/ef-line';
+import AllocationBar from '@/components/planner/charts/allocation-bar';
+import PlannerControls from '@/components/planner/controls';
+import SummaryCards from '@/components/planner/summary-cards';
 
-import DashboardHeader from '../../components/dashboard/dashboard-header';
-import FinancialOverview from '../../components/dashboard/financial-overview';
-import RecentTransactions from '../../components/dashboard/recent-transactions';
-import BudgetProgress from '../../components/dashboard/budget-progress';
-import QuickActions from '../../components/dashboard/quick-actions';
-import ExpenseChart from '../../components/dashboard/expense-chart';
-import IncomeVsExpenses from '../../components/dashboard/income-vs-expenses';
+const DashboardPage: React.FC = () => {
+  const {
+    monthlyIncome,
+    fixed,
+    goals,
+    portfolio,
+    assumptions,
+    projections,
+    compute,
+  } = usePlannerStore();
 
-interface Transaction {
-  id: string;
-  description: string;
-  amount: number;
-  date: string;
-  category: string;
-  type: 'income' | 'expense';
-}
-
-export default function DashboardPage() {
-  const { user } = useAuth();
-  const [financialData, setFinancialData] = useState({
-    totalBalance: 0,
-    monthlyIncome: 0,
-    monthlyExpenses: 0,
-    savings: 0,
-    budgetUsed: 0,
-    recentTransactions: [] as Transaction[],
-    loading: true,
-    error: null as string | null
-  });
-
+  // Auto compute on first load and whenever inputs change
   useEffect(() => {
-    const loadFinancialData = async () => {
-      try {
-        setFinancialData(prev => ({ ...prev, loading: true, error: null }));
-        
-        const summary = await financeService.getFinancialSummary();
-        
-        // Calculate total balance (this is simplified - in real app you'd have account balances)
-        const totalBalance = summary.savings > 0 ? summary.totalIncome * 3 : summary.totalIncome * 2;
-        
-        setFinancialData({
-          totalBalance,
-          monthlyIncome: summary.totalIncome,
-          monthlyExpenses: summary.totalExpenses,
-          savings: summary.savings,
-          budgetUsed: summary.totalIncome > 0 ? Math.round((summary.totalExpenses / summary.totalIncome) * 100) : 0,
-          recentTransactions: summary.transactions.slice(0, 5) as Transaction[],
-          loading: false,
-          error: null
-        });
-      } catch (error) {
-        console.error('Failed to load financial data:', error);
-        setFinancialData(prev => ({
-          ...prev,
-          loading: false,
-          error: 'Failed to load financial data. Please try again.'
-        }));
-      }
-    };
+    compute();
+  }, [monthlyIncome, fixed, goals, portfolio, assumptions, compute]);
 
-    loadFinancialData();
-  }, []);
-
-  if (financialData.loading) {
-    return (
-      <ProtectedRoute requireAuth={true}>
-        <div style={{ backgroundColor: theme.colors.background, minHeight: '100vh', fontFamily: theme.typography.fontFamily }}>
-          <DashboardHeader user={user} />
-          <main className="max-w-7xl mx-auto px-6 py-8">
-            <div className="flex items-center justify-center h-64">
-              <div className="flex flex-col items-center space-y-4">
-                <div 
-                  className="animate-spin rounded-full h-12 w-12 border-b-2"
-                  style={{ borderColor: theme.colors.primary }}
-                />
-                <p 
-                  className="text-sm font-medium"
-                  style={{ 
-                    color: theme.colors.textSecondary,
-                    fontFamily: theme.typography.fontFamily 
-                  }}
-                >
-                  Loading your financial data...
-                </p>
-              </div>
-            </div>
-          </main>
-        </div>
-      </ProtectedRoute>
-    );
-  }
+  const latest = useMemo(() => projections?.points?.[projections.points.length - 1], [projections]);
 
   return (
-    <ProtectedRoute requireAuth={true}>
-      <div style={{ backgroundColor: theme.colors.background, minHeight: '100vh', fontFamily: theme.typography.fontFamily }}>
-        {/* Dashboard Header */}
-        <DashboardHeader user={user} />
-        
-        {/* Main Dashboard Content */}
-        <main className="max-w-7xl mx-auto px-6 py-8">
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 
-              className="text-3xl font-bold mb-2"
-              style={{ 
-                color: theme.colors.textPrimary,
-                fontWeight: theme.typography.fontWeight.bold 
-              }}
-            >
-              Welcome back, {user?.name?.split(' ')[0] || 'User'}!
-            </h1>
-            <p 
-              className="text-lg"
-              style={{ 
-                color: theme.colors.textSecondary,
-                fontSize: theme.typography.fontSize.lg 
-              }}
-            >
-              Here&apos;s your financial overview for {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">DhanRaksha — Planning & Goals</h1>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Income {formatINR(monthlyIncome)} • Plan {assumptions.planMonths} months</div>
+        </div>
+      </header>
 
-          {/* Error Message */}
-          {financialData.error && (
-            <div 
-              className="mb-6 p-4 rounded-md text-sm"
-              style={{ 
-                backgroundColor: '#FEF2F2',
-                color: theme.colors.loss,
-                border: `1px solid ${theme.colors.loss}20`,
-                borderRadius: theme.radii.md 
-              }}
-            >
-              {financialData.error}
-            </div>
-          )}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <SummaryCards />
 
-          {/* Financial Overview Cards */}
-          <FinancialOverview data={financialData} />
+            <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Net Worth Projection (5 years)</h3>
+                <NetWorthLine />
+              </div>
+              <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Emergency Fund Growth</h3>
+                <EmergencyFundLine />
+              </div>
+            </motion.div>
 
-          {/* Dashboard Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-            {/* Left Column - Charts */}
-            <div className="lg:col-span-2 space-y-6">
-              <IncomeVsExpenses />
-              <ExpenseChart />
-            </div>
-
-            {/* Right Column - Widgets */}
-            <div className="space-y-6">
-              <QuickActions />
-              <BudgetProgress data={financialData} />
-              <RecentTransactions transactions={financialData.recentTransactions} />
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Monthly Allocation</h3>
+              <AllocationBar />
             </div>
           </div>
-        </main>
-      </div>
-    </ProtectedRoute>
+
+          <div className="space-y-6">
+            <PlannerControls />
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Summary</h3>
+              <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                <li>EF Target: {formatINR(goals.emergencyTarget)} at {assumptions.efReturn}% p.a.</li>
+                <li>Portfolio CAGR: {assumptions.portfolioCAGR}% p.a.</li>
+                <li>Current Portfolio: {formatINR(portfolio.currentValue)}</li>
+                {(() => { const efIndex = projections?.efCompletionMonthIndex; return (efIndex !== null && efIndex !== undefined) ? (
+                  <li>EF completes in month {efIndex + 1}</li>
+                ) : null; })()}
+                {latest && (
+                  <li>Projected Net Worth: {formatINR(latest.netWorth)}</li>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   );
-}
+};
+
+export default DashboardPage;

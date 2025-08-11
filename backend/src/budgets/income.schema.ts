@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 @Schema()
 export class Income {
@@ -14,6 +14,10 @@ export class Income {
 
   @Prop()
   category?: string;
+
+  // New: owner of this income
+  @Prop({ type: Types.ObjectId, ref: 'User', index: true, required: true })
+  userId: Types.ObjectId;
 }
 
 export type IncomeDocument = Income & Document;
